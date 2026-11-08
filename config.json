@@ -1,0 +1,14 @@
+{
+  "hall_host": "127.0.0.1",
+  "hall_port": 7802,
+  "inject_prompt": true,
+  "vision": {
+    "base_url": "",
+    "api_key": "",
+    "model": "",
+    "timeout_s": 60
+  },
+  "preview": {
+    "github_token": ""
+  }
+}

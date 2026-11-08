@@ -1,0 +1,19 @@
+# 运行时数据与图片，不入库
+data/
+memes/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 日志与临时
+*.log

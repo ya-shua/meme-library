@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>表情包收录库 · meme-library</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🐟</div>
+      <div class="brand-text">
+        <div class="brand-title">表情包收录库</div>
+        <div class="brand-sub">meme-library</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item" data-view="overview"><span class="ni">▤</span>概览</button>
+      <button class="nav-item active" data-view="store"><span class="ni">◎</span>资源广场</button>
+      <button class="nav-item" data-view="manage"><span class="ni">▦</span>我的表情包</button>
+      <button class="nav-item" data-view="dl"><span class="ni">⤓</span>下载</button>
+      <button class="nav-item" data-view="trash"><span class="ni">🗑</span>回收站</button>
+      <button class="nav-item" data-view="review"><span class="ni">✓</span>审核中心</button>
+      <button class="nav-item" data-view="settings"><span class="ni">⚙</span>设置</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="foot-line"><span>图库</span><b id="foot-total">—</b></div>
+      <div class="foot-line"><span>可用分类</span><b id="foot-tags">—</b></div>
+      <div class="foot-line"><span>端口</span><b>7802</b></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- ========== 资源广场 ========== -->
+    <section class="view active" id="view-store">
+      <header class="page-head">
+        <div>
+          <h2>资源广场</h2>
+          <p>先在线看，满意了再下载入库。预览不占本地空间。</p>
+        </div>
+        <div class="manual-row">
+          <input id="store-url" type="text" placeholder="手上还有别的仓库地址？贴进来先看一眼" />
+          <button id="store-preview" class="btn ghost">预览</button>
+        </div>
+      </header>
+
+      <div class="store-grid" id="store-index"></div>
+
+      <p class="msg" id="store-msg"></p>
+
+      <!-- 预览详情 -->
+      <section class="detail hidden" id="detail">
+        <header class="detail-head">
+          <div class="dh-left">
+            <button class="icon-btn" id="detail-close" title="关闭">←</button>
+            <div>
+              <h3 id="detail-name">—</h3>
+              <div class="detail-meta">
+                <span class="pill" id="detail-platform"></span>
+                <span class="pill" id="detail-branch"></span>
+                <span class="pill" id="detail-count"></span>
+                <span class="pill native" id="detail-native"></span>
+              </div>
+            </div>
+          </div>
+          <div class="dh-right">
+            <select id="detail-type">
+              <option value="emotion">存为情绪包</option>
+              <option value="meme">存为梗图包</option>
+            </select>
+            <button id="detail-download" class="btn primary">下载入库</button>
+          </div>
+        </header>
+
+        <p class="detail-desc" id="detail-desc"></p>
+        <p class="msg warn" id="detail-warn"></p>
+        <p class="msg tip-line">图源在境外，没收录的包每张缩略图都要现拉原图，一张十来秒；一页 24 张，翻着看就行。收录之后全部从本地读，秒开。</p>
+        <p class="dl-text hidden" id="detail-progress-text"></p>
+
+        <div class="chips" id="detail-groups"></div>
+        <div class="img-grid preview-grid" id="detail-grid"></div>
+        <div class="pager">
+          <button id="detail-prev" class="btn ghost">上一页</button>
+          <span id="detail-pageinfo">1</span>
+          <button id="detail-next" class="btn ghost">下一页</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- ========== 我的表情包 ========== -->
+    <section class="view" id="view-manage">
+      <header class="page-head">
+        <div>
+          <h2>我的表情包</h2>
+          <p>每个集合是独立文件夹，勾哪个用哪个，可多选混着用。点卡片进去看里面的图，左边那个 ← 回来。</p>
+        </div>
+        <div class="head-actions">
+          <span class="pack-stat">共 <b id="pack-total">—</b> 个包</span>
+          <span class="pack-stat on"><b id="pack-on">—</b> 个启用</span>
+          <span class="pack-stat" id="pack-sel">已选 0</span>
+          <button id="pack-del-sel" class="btn danger">删除选中</button>
+        </div>
+      </header>
+
+      <select id="manage-pack" class="hidden"></select>
+      <div class="store-grid" id="pack-grid"></div>
+    </section>
+
+    <!-- ========== 下载 ========== -->
+    <section class="view" id="view-dl">
+      <header class="page-head">
+        <div>
+          <h2>下载</h2>
+          <p>正在下的和下载过的都在这。切到别的页、关掉预览，下载照样在后台跑。</p>
+        </div>
+        <div class="head-actions">
+          <span class="pack-stat" id="dl-count">共 0 条</span>
+          <button id="dl-clear" class="btn ghost danger">清空记录</button>
+        </div>
+      </header>
+      <div class="dl-list" id="dl-list"></div>
+    </section>
+
+    <!-- 某个包的整页浮层：翻着看、点走查，← 回列表 -->
+    <section class="detail hidden" id="pack-view">
+      <header class="detail-head">
+        <div class="dh-left">
+          <button class="icon-btn" id="pack-close" title="返回">←</button>
+          <div>
+            <h3 id="pack-title">—</h3>
+            <div class="detail-meta">
+              <span class="badge on" id="pack-state">已启用</span>
+              <span class="pill" id="pack-count">0 张</span>
+            </div>
+          </div>
+        </div>
+        <div class="dh-right">
+          <button class="btn" id="pack-toggle">禁用</button>
+          <button class="btn ghost danger" id="pack-del">删除这个包</button>
+        </div>
+      </header>
+
+      <div class="manage-layout">
+        <aside class="tag-rail" id="tag-rail"></aside>
+        <div class="manage-main">
+          <div class="toolbar">
+            <div class="tl-left">
+              <span class="count" id="manage-count">—</span>
+              <label class="check"><input type="checkbox" id="select-all" />全选本页</label>
+            </div>
+            <div class="tl-right">
+              <span class="sel-count" id="sel-count">已选 0</span>
+              <select id="batch-tag"></select>
+              <button id="batch-add" class="btn">加标签</button>
+              <button id="batch-set" class="btn">改标签</button>
+              <button id="batch-delete" class="btn danger">删图</button>
+            </div>
+          </div>
+          <div class="img-grid" id="manage-grid"></div>
+          <div class="pager">
+            <button id="manage-prev" class="btn ghost">上一页</button>
+            <span id="manage-pageinfo">1</span>
+            <button id="manage-next" class="btn ghost">下一页</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 回收站 ========== -->
+    <section class="view" id="view-trash">
+      <header class="page-head">
+        <div>
+          <h2>回收站</h2>
+          <p>删掉的图先挪到这儿，最多留 50 张，超了自动清最旧的。想用回来点「复原」。</p>
+        </div>
+        <div class="head-actions">
+          <button id="trash-empty" class="btn danger">清空回收站</button>
+        </div>
+      </header>
+
+      <p class="msg" id="trash-msg"></p>
+      <div class="store-grid" id="trash-grid"></div>
+    </section>
+
+    <!-- ========== 审核中心 ========== -->
+    <section class="view" id="view-review">
+      <header class="page-head">
+        <div>
+          <h2>审核中心</h2>
+          <p>AI 高置信的小概率出错，低置信的需要你过一眼。都能一键入库、也能撤回。</p>
+        </div>
+        <div class="head-actions">
+          <button id="review-local" class="btn">本地规则打标</button>
+          <button id="review-ai" class="btn">AI 识别</button>
+        </div>
+      </header>
+
+      <p class="msg" id="review-msg"></p>
+
+      <div class="review-cols">
+        <section class="review-col">
+          <header class="rc-head">
+            <div>
+              <h3>高置信待确认</h3>
+              <span class="sub" id="high-count">—</span>
+            </div>
+            <button class="btn primary" id="confirm-high">整档入库</button>
+          </header>
+          <div class="img-grid small" id="grid-high"></div>
+        </section>
+
+        <section class="review-col">
+          <header class="rc-head">
+            <div>
+              <h3>待审核</h3>
+              <span class="sub" id="low-count">—</span>
+            </div>
+            <button class="btn primary" id="confirm-low">整档入库</button>
+          </header>
+          <div class="img-grid small" id="grid-low"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ========== 概览 ========== -->
+    <section class="view" id="view-overview">
+      <header class="page-head">
+        <div>
+          <h2>概览</h2>
+          <p>图库整体状态，看哪类图够用、哪类还缺。</p>
+        </div>
+      </header>
+
+      <div class="stat-row" id="stat-cards"></div>
+
+      <div class="panel">
+        <h3 class="panel-title">分类分布</h3>
+        <p class="panel-sub">只有「已确认」的图会被自动配图选中。</p>
+        <div class="tag-bars" id="tag-bars"></div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">集合</h3>
+        <div class="pack-table" id="pack-table"></div>
+      </div>
+    </section>
+
+    <!-- ========== 设置 ========== -->
+    <section class="view" id="view-settings">
+      <header class="page-head">
+        <div>
+          <h2>设置</h2>
+          <p>心情映射是本地的静态表，改它不用花 token。</p>
+        </div>
+      </header>
+
+      <div class="panel">
+        <h3 class="panel-title">预览加速</h3>
+        <p class="panel-sub">预览图默认从仓库现拉原图，一张两三兆，翻起来很卡。装了 Pillow 之后服务端会把原图缩成小图再给你，一张四十来 KB，翻页基本秒出。缩略图只用于看，入库下载的永远是原图。</p>
+        <div class="thumb-row">
+          <div class="thumb-state" id="thumb-state">检测中……</div>
+          <button id="thumb-install" class="btn primary">一键装 Pillow</button>
+        </div>
+        <div class="thumb-row">
+          <label for="thumb-max">缩略图缓存上限</label>
+          <input id="thumb-max" type="number" min="8" max="4096" step="8" value="128" />
+          <span class="sub">MB</span>
+          <button id="thumb-save" class="btn">保存</button>
+          <span class="sub" id="thumb-used"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">心情词 → 标准分类</h3>
+        <p class="panel-sub">你心情插件里的词和这里的分类对不上时，加一条映射就行。命中不到会自动兜底到最接近的分类。</p>
+        <div class="mood-add">
+          <input id="mood-word" type="text" placeholder="心情词，比如 美滋滋" />
+          <select id="mood-tag"></select>
+          <button id="mood-add-btn" class="btn primary">保存</button>
+        </div>
+        <div class="mood-grid" id="mood-list"></div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">内置心情词</h3>
+        <p class="panel-sub">下面这些词开箱就能认，不用再往上面加。时长插件吐出来的是别的说法，就在上面补映射。</p>
+        <div class="builtin-moods" id="builtin-moods"></div>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">自动配图链路</h3>
+        <div class="chain">
+          <span class="chain-node">模型判断心情</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">心情词查映射表</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">标准分类</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">已确认图里随机抽</span>
+        </div>
+        <p class="panel-sub">梗图包不参加这条链路，只手动发。</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="img-viewer hidden" id="img-viewer"><img alt="" /></div>
+
+  <!-- 读仓库时的居中提示，不被挤到页面最下面看不见 -->
+  <div class="load-mask hidden" id="loading">
+    <div class="load-box">
+      <span class="spin"></span>
+      <b id="loading-text">读取仓库中……</b>
+    </div>
+  </div>
+
+  <!-- 自家确认框，不弹浏览器那种 -->
+  <div class="modal-mask hidden" id="modal">
+    <div class="modal">
+      <h3 id="modal-title">确认一下</h3>
+      <p id="modal-text"></p>
+      <div class="modal-foot">
+        <button class="btn ghost" id="modal-cancel">算了</button>
+        <button class="btn primary" id="modal-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- 下载小窗：进度短条 + 取消 / 后台 -->
+  <div class="dl-pop hidden" id="dl-pop">
+    <div class="dl-pop-head">
+      <span class="dl-pop-title" id="dl-title">正在下载</span>
+      <button class="icon-btn" id="dl-hide" title="收到后台">—</button>
+    </div>
+    <div class="dl-pop-bar"><span id="dl-fill"></span></div>
+    <div class="dl-pop-meta"><span id="dl-pct">0%</span><span id="dl-meta">准备中……</span></div>
+    <div class="dl-pop-foot">
+      <button class="btn ghost danger" id="dl-cancel">取消</button>
+      <button class="btn ghost" id="dl-bg">后台下载</button>
+    </div>
+  </div>
+
+  <button class="dl-mini hidden" id="dl-mini">
+    <span class="dl-mini-dot"></span>
+    <span id="dl-mini-text">下载中 0%</span>
+  </button>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
