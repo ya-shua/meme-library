@@ -1,5 +1,9 @@
 """表情包收录库的常量定义。"""
 
+# 插件版本：唯一来源，必须与 metadata.json 的 version 一致。
+# 契约接口 GET /api/health 报的是这个值（元数据只是被人读的副本）。
+PLUGIN_VERSION = "1.1.1"
+
 # 标准分类：标准标识 -> 中文名
 STANDARD_TAGS = {
     "happy": "开心",

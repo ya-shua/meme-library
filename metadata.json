@@ -7,6 +7,28 @@
   "builtin": false,
   "page": "http://127.0.0.1:7802/",
   "port": 7802,
+  "capabilities": [
+    "本地表情包收录库",
+    "Git 仓库下载入库",
+    "大厅预览与集合隔离",
+    "两档审核（高置信/待审核）",
+    "心情映射自动配图",
+    "梗图独立不自动发"
+  ],
+  "standalone": {
+    "works_alone": true,
+    "needs": ["Python 3.10+", "aiohttp>=3.9（唯一硬依赖）", "Pillow 可选（缩略图更快）", "聊天指令要海螺宿主（core.message / ctx）"],
+    "how": "大厅可单独起：装配 HallServer 监听 127.0.0.1:7802（见 docs/对接.md「单独运行」，6 行）；聊天指令把目录放进海螺 plugin_paths 走 main.py"
+  },
+  "contract": "docs/对接.md",
+  "launch": {
+    "runtime": "python",
+    "entry": "main.py",
+    "args": [],
+    "port": 7802,
+    "url": "http://127.0.0.1:7802/",
+    "note": "海螺宿主内加载：调用 main.py 的 setup(ctx) 起服务，大厅随之监听 7802；没有独立可执行入口（直接 python main.py 会缺 ctx / core.message）。只想跑大厅见 docs/对接.md「单独运行」。"
+  },
   "source": {
     "repo": "ya-shua/meme-library"
   }

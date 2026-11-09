@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import shutil
 import sys
 import time
 import uuid
+from datetime import datetime
 
 from aiohttp import web
 
 from meme_core.constants import (
+    PLUGIN_VERSION,
     PACK_EMOTION,
     PACK_MEME,
     REPO_SOURCES,
@@ -33,6 +36,8 @@ class HallServer:
         self.jobs: dict[str, dict] = {}
         self.trash_dir = (plugin_root / "data" / "trash")
         self.trash_max = 50   # 回收站最多留 50 张，超了从最旧的开始清
+        self.started_at = time.time()   # 契约接口用：进程/服务启动时刻
+        self.port = None                # start() 里填真实监听端口
         self._heal_dead_jobs()   # 上次没跑完的任务标成中断，别一直挂在“下载中”
 
     def _heal_dead_jobs(self) -> None:
@@ -49,6 +54,11 @@ class HallServer:
 
     async def start(self, host: str, port: int) -> None:
         app = web.Application()
+        # 对接契约（只读、无隐私）：任意宿主据此判断「接得对不对、版本对不对、能用到哪些能力」
+        app.add_routes([
+            web.get("/api/health", self.health),
+            web.get("/api/manifest", self.manifest),
+        ])
         app.add_routes(
             [
                 web.get("/api/overview", self.overview),
@@ -102,6 +112,7 @@ class HallServer:
         self.runner = web.AppRunner(app, access_log=None)
         await self.runner.setup()
         site = web.TCPSite(self.runner, host, port)
+        self.port = port   # 契约接口报「实际监听端口」，由这里填
         await site.start()
 
     async def serve_view(self, request):
@@ -118,6 +129,37 @@ class HallServer:
         if self.runner is not None:
             await self.runner.cleanup()
             self.runner = None
+
+    # ---------------- 对接契约（只读，给任意宿主判「能不能接」） ----------------
+
+    def _metadata(self) -> dict:
+        """仓库根 metadata.json。只读；读坏/读不到就给空对象，不让契约接口 500。"""
+        try:
+            return json.loads((self.root / "metadata.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+
+    async def health(self, request):
+        """探活：活没活、是哪份、什么版本、跑多久了。不含任何密钥/用户数据。"""
+        return web.json_response({
+            "ok": True,
+            "id": self._metadata().get("id", ""),
+            "version": PLUGIN_VERSION,
+            "uptime_s": int(time.time() - self.started_at),
+        })
+
+    async def manifest(self, request):
+        """清单：元数据原文 + 本次运行的真实端口/pid/启动时刻。"""
+        return web.json_response({
+            "ok": True,
+            "metadata": self._metadata(),
+            "runtime": {
+                "port": self.port,
+                "pid": os.getpid(),
+                "started_at": datetime.fromtimestamp(self.started_at).astimezone().isoformat(
+                    timespec="seconds"),
+            },
+        })
 
     # ---------------- handlers ----------------
     async def overview(self, request):
