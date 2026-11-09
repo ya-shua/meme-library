@@ -6,5 +6,8 @@
   "description": "独立表情包收录库：Git 下载、大厅预览、集合隔离、两档审核、心情映射、梗图独立",
   "builtin": false,
   "page": "http://127.0.0.1:7802/",
-  "port": 7802
+  "port": 7802,
+  "source": {
+    "repo": "ya-shua/meme-library"
+  }
 }

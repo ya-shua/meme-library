@@ -1,6 +1,17 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
+// 页面里任何没被接住的报错都直接说出来，不要让人对着「点了没反应」猜
+window.addEventListener("error", (e) => {
+  console.error("[大厅]", e.error || e.message);
+  try { toast("出错了：" + (e.message || "未知错误")); } catch (_) { /* 连提示层都还没起来 */ }
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const msg = (e.reason && e.reason.message) || e.reason || "未知错误";
+  console.error("[大厅] 异步出错", e.reason);
+  try { toast("出错了：" + msg); } catch (_) { /* ignore */ }
+});
+
 let CONST = { standard_tags: {} };
 const state = {
   packs: [],
